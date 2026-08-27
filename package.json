@@ -1,1 +1,26 @@
-{"name":"randdbd","private":true,"version":"1.0.0","type":"module","scripts":{"dev":"vite --host 0.0.0.0","build":"vite build && vite build --ssr src/index.js --outDir dist/server --emptyOutDir false","preview":"vite preview"},"dependencies":{"@openai/sites-vite-plugin":"latest","@vitejs/plugin-react":"latest","lucide-react":"latest","react":"latest","react-dom":"latest","typescript":"latest","vite":"latest"},"devDependencies":{"cheerio":"^1.2.0"}}
+{
+  "name": "randdbd",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build && vite build --ssr src/index.js --outDir dist/server --emptyOutDir false",
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@openai/sites-vite-plugin": "latest",
+    "@vitejs/plugin-react": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "cheerio": "^1.2.0",
+    "prettier": "3.6.2"
+  }
+}

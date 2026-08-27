@@ -1,25 +1,10 @@
-import React, {useMemo, useState} from 'react';
-import {createRoot} from 'react-dom/client';
-import {RefreshCw, Users, Shuffle, Info, X, Skull} from 'lucide-react';
-import './styles.css';
-import survivorPerks from './data/survivor-perks.json';
-const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { App } from './App'
+import './styles.css'
 
-function App(){
- const [count,setCount]=useState(1),[playerNames,setPlayerNames]=useState(['','','','']),[allowRepeat,setAllowRepeat]=useState(true),[builds,setBuilds]=useState([]),[selected,setSelected]=useState(null);
- const perks=survivorPerks;
- const updatePlayerName=(index,value)=>setPlayerNames(names=>names.map((name,i)=>i===index?value:name));
- const randomize=()=>{if(perks.length<4)return;const pool=shuffle(perks);let next=[];if(allowRepeat){for(let i=0;i<count;i++)next.push(shuffle(perks).slice(0,4))}else{for(let i=0;i<count;i++)next.push(pool.slice(i*4,i*4+4))}setBuilds(next)};
- const rerollPlayer=index=>setBuilds(current=>{const blocked=new Set(current[index].map(perk=>perk.id));if(!allowRepeat)current.forEach((build,i)=>{if(i!==index)build.forEach(perk=>blocked.add(perk.id))});const replacement=shuffle(perks.filter(perk=>!blocked.has(perk.id))).slice(0,4);return current.map((build,i)=>i===index?replacement:build)});
- const total=useMemo(()=>new Set(perks.map(p=>p.id)).size,[perks]);
- return <main>
-  <header><div className="brand"><div className="mark"><span/><span/><span/><span/></div><div><b>RandDBD</b><small>RANDOMIZADOR DE PERKS</small></div></div><div className="status"><i/> {`${total} perks disponíveis`}</div></header>
-  <section className="hero"><div className="eyebrow"><Skull size={14}/> ENTRE NA NÉVOA</div><h1>Sua próxima build.<br/><em>Deixe o acaso decidir.</em></h1><p>Monte loadouts imprevisíveis para o seu esquadrão. Quatro perks por sobrevivente, zero escolhas fáceis.</p></section>
-  <section className="control"><div className="control-title"><div><span>CONFIGURE A PARTIDA</span><h2>Quantos sobreviventes?</h2></div><Users/></div><div className="number-row">{[1,2,3,4].map(n=><button aria-label={`${n} jogador${n>1?'es':''}`} className={count===n?'active':''} onClick={()=>{setCount(n);setBuilds([])}} key={n}><b>{n}</b><small>{n===1?'JOGADOR':'JOGADORES'}</small></button>)}</div><div className="name-section"><div className="field-label"><b>Nome dos jogadores</b><small>Identifique cada loadout</small></div><div className="name-grid">{Array.from({length:count},(_,i)=><label key={i}><span>JOGADOR {i+1}</span><input value={playerNames[i]} onChange={e=>updatePlayerName(i,e.target.value)} maxLength={24} placeholder={`Nome do jogador ${i+1}`} autoComplete="off"/></label>)}</div></div><div className="toggle-row"><div><b>Permitir perks repetidas</b><small>Entre jogadores diferentes</small></div><button className={`switch ${allowRepeat?'on':''}`} role="switch" aria-checked={allowRepeat} onClick={()=>{setAllowRepeat(v=>!v);setBuilds([])}}><span/></button></div><button className="random" onClick={randomize}><Shuffle size={20}/> RANDOMIZAR LOADOUTS</button><div className="hint"><Info size={14}/>{allowRepeat?'Cada jogador terá 4 perks únicas; elas podem aparecer em outro loadout.':'As perks serão únicas em todo o esquadrão.'}</div></section>
-  {builds.length>0&&<section className="results"><div className="results-head"><div><span>RESULTADO</span><h2>{count===1?'Seu loadout':'Loadouts do esquadrão'}</h2></div><button onClick={randomize}><RefreshCw size={16}/> Rolar novamente</button></div><div className="players">{builds.map((build,i)=><article className="player" key={i}><div className="player-head"><span>0{i+1}</span><div className="player-name"><b>{playerNames[i].trim()||`JOGADOR ${i+1}`}</b><small>SOBREVIVENTE</small></div>{count>1&&<button className="player-reroll" onClick={()=>rerollPlayer(i)} aria-label={`Rolar novamente as perks de ${playerNames[i].trim()||`Jogador ${i+1}`}`} title="Rolar somente este jogador"><RefreshCw size={14}/> ROLAR ESTE</button>}</div><div className="perks">{build.map(p=><button key={p.id} onClick={()=>setSelected(p)}><div className="diamond"><img src={p.image} alt="" onError={e=>{e.currentTarget.style.opacity='.15'}}/></div><b>{p.name}</b><small>{p.owner}</small></button>)}</div></article>)}</div></section>}
-  {builds.length===0&&<section className="empty"><div className="diamond ghost"><Shuffle/></div><b>A névoa está esperando</b><span>Configure a partida e randomize para revelar suas perks.</span></section>}
-  <footer><span>Catálogo local · Patch 10.1.0 Chorus of Sin · Fonte: DBD Wiki</span><span>FEITO PARA A NÉVOA</span></footer>
-  {selected&&<div className="modal-back" onClick={()=>setSelected(null)}><div className="modal" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSelected(null)}><X/></button><div className="modal-top"><div className="diamond big"><img src={selected.image} alt={selected.name}/></div><div><span>PERK DE SOBREVIVENTE</span><h2>{selected.name}</h2><small>{selected.owner}</small></div></div><div className="rule"/><h3>EFEITO</h3><p>{selected.description}</p><div className="note"><Info/> Valores e efeitos podem variar conforme atualizações do jogo.</div></div></div>}
- </main>
-}
-createRoot(document.getElementById('root')).render(<App/>);
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)

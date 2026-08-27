@@ -1,0 +1,6 @@
+dist/
+node_modules/
+.pnpm-store/
+.openai/
+public/perks/
+src/data/survivor-perks.json
