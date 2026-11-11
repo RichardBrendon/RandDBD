@@ -27,6 +27,24 @@ pnpm dev
 
 Abra [http://localhost:5173](http://localhost:5173). Para gerar a compilação de produção, execute `pnpm build`. Para verificar a formatação do código, execute `pnpm format:check`.
 
+## Android
+
+[Baixar o APK mais recente](https://github.com/RichardBrendon/RandDBD/releases/latest/download/randdbd.apk)
+
+O app Android inclui a interface, o catálogo, os ícones e as fontes no APK. O sorteio e os detalhes das perks funcionam offline.
+
+Para gerar um APK de teste, instale o Android Studio com o SDK Android 36 e configure o terminal para usar o JDK 21 e o diretório do SDK. Depois de executar `pnpm install`, rode:
+
+```powershell
+pnpm android:sync
+cd android
+.\gradlew.bat assembleDebug
+```
+
+O APK de teste fica em `android/app/build/outputs/apk/debug/app-debug.apk`. Para abrir o projeto no Android Studio, execute `pnpm android:open` na raiz. Repita a sincronização após atualizar a interface ou o catálogo.
+
+Para distribuir uma versão pública, gere um **APK de lançamento assinado** no Android Studio. Guarde a chave fora do repositório e use a mesma chave e o mesmo identificador de pacote nas atualizações. Aumente o `versionCode` em `android/app/build.gradle` a cada lançamento.
+
 ## Estrutura do projeto
 
 O site usa **React**, **Vite** e **CSS**. O catálogo e os ícones fazem parte do projeto.

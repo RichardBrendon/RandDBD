@@ -4,6 +4,10 @@ node_modules/
 
 # Production builds and caches
 dist/
+dist-android/
+*.jks
+*.keystore
+*.p12
 .vite/
 coverage/
 

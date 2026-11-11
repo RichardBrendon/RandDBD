@@ -1,4 +1,6 @@
 dist/
+dist-android/
+android/
 node_modules/
 .pnpm-store/
 .openai/

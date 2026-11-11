@@ -1,6 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=Inter:wght@400;500;600;700&display=swap');
+@import '@fontsource-variable/inter';
+@import '@fontsource/barlow-condensed/latin-600.css';
+@import '@fontsource/barlow-condensed/latin-700.css';
+@import '@fontsource/barlow-condensed/latin-800.css';
+@import '@fontsource/barlow-condensed/latin-700-italic.css';
 :root {
-  font-family: Inter, sans-serif;
+  font-family: 'Inter Variable', sans-serif;
   color: #eee;
   background: #090b0b;
   font-synthesis: none;
@@ -274,7 +278,9 @@ header {
   height: 58px;
   border: 0;
   background: #9d3933;
-  font: 700 13px Inter;
+  font:
+    700 13px 'Inter Variable',
+    sans-serif;
   letter-spacing: 1.5px;
   cursor: pointer;
   display: flex;
@@ -466,6 +472,18 @@ footer {
   font-size: 9px;
   letter-spacing: 1px;
 }
+.android-download {
+  color: #e8e8e5;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.android-download:hover,
+.android-download:focus-visible {
+  text-decoration: underline;
+}
+
 .modal-back {
   position: fixed;
   inset: 0;
@@ -478,6 +496,8 @@ footer {
 }
 .modal {
   width: min(540px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
   background: #131616;
   border: 1px solid #3a403e;
   padding: 34px;
