@@ -8,6 +8,7 @@ export function MatchConfigurator({
   onPlayerCountChange,
   onPlayerNameChange,
   onRandomize,
+  onEditAvailablePerks,
   onToggleRepeat,
   playerCount,
   playerNames,
@@ -77,6 +78,9 @@ export function MatchConfigurator({
         </button>
       </div>
 
+      <button className="catalog-shortcut" onClick={onEditAvailablePerks}>
+        Editar perks disponíveis
+      </button>
       {challengeControls}
       <button className="random" onClick={onRandomize}>
         <Shuffle size={20} /> RANDOMIZAR LOADOUTS

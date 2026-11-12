@@ -111,7 +111,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
   }
 
   function randomizeAll() {
-    draw()
+    return draw()
   }
 
   function randomizePlayer(playerIndex) {
@@ -152,6 +152,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
       } else {
         setBuilds(next)
         onDraw(next, playerNames)
+        return true
       }
       return
     }
@@ -181,6 +182,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
     }
     setBuilds(next)
     onDraw(next, playerNames)
+    return true
   }
 
   function togglePerkLock(playerIndex, slotIndex) {

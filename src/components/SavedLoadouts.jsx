@@ -92,8 +92,8 @@ export function SavedLoadouts({
   }
 
   return (
-    <details className="control saved-loadouts">
-      <summary>Histórico, favoritos e presets</summary>
+    <section className="control saved-loadouts">
+      <h2>Histórico, favoritos e presets</h2>
       {library.storageError && (
         <p role="alert">
           O armazenamento local está indisponível. As alterações duram apenas
@@ -158,6 +158,6 @@ export function SavedLoadouts({
           ))}
         </ul>
       </details>
-    </details>
+    </section>
   )
 }

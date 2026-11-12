@@ -50,8 +50,8 @@ export function PerkCatalog({
   const visibleIds = visible.map((perk) => perk.id)
 
   return (
-    <details className="control perk-catalog">
-      <summary>Catálogo e perks disponíveis</summary>
+    <section className="control perk-catalog">
+      <h2>Catálogo de perks</h2>
       <div className="catalog-filters">
         <label>
           Jogador
@@ -154,6 +154,6 @@ export function PerkCatalog({
           ))}
         </ul>
       )}
-    </details>
+    </section>
   )
 }
