@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AndroidUpdateNotice } from './components/AndroidUpdateNotice'
 import { ChallengeMode } from './components/ChallengeMode'
 import { EmptyState } from './components/EmptyState'
 import { Hero } from './components/Hero'
@@ -71,6 +72,9 @@ export function App() {
   return (
     <main>
       <SiteHeader perkCount={perksById.size} />
+      {__RANDDBD_ANDROID_VERSION__ && (
+        <AndroidUpdateNotice version={__RANDDBD_ANDROID_VERSION__} />
+      )}
       <Hero />
 
       <MatchConfigurator
