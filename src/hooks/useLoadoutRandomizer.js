@@ -1,8 +1,31 @@
-import { useState } from 'react'
-import { createBuilds, rerollBuilds } from '../utils/randomizer'
+import { useEffect, useState } from 'react'
+import {
+  createBuilds,
+  PERKS_PER_PLAYER,
+  rerollBuilds,
+} from '../utils/randomizer'
 
 const MAX_PLAYERS = 4
 const INITIAL_PLAYER_NAMES = Array(MAX_PLAYERS).fill('')
+const STORAGE_KEY = 'randdbd.perk-pools.v1'
+
+function readSelections() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+    if (Array.isArray(stored)) {
+      return stored
+        .slice(0, MAX_PLAYERS)
+        .map((ids) =>
+          Array.isArray(ids)
+            ? ids.filter((id) => typeof id === 'string')
+            : null,
+        )
+    }
+  } catch {
+    // The randomizer still works when storage is unavailable.
+  }
+  return []
+}
 
 export function useLoadoutRandomizer(perks) {
   const [playerCount, setPlayerCount] = useState(1)
@@ -10,11 +33,46 @@ export function useLoadoutRandomizer(perks) {
   const [allowRepeat, setAllowRepeat] = useState(true)
   const [builds, setBuilds] = useState([])
   const [locks, setLocks] = useState({})
+  const [selections, setSelections] = useState(readSelections)
+  const [drawError, setDrawError] = useState('')
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(selections))
+    } catch {
+      // Keep the selection in memory for this session.
+    }
+  }, [selections])
+
+  function resetDraw() {
+    setBuilds([])
+    setLocks({})
+    setDrawError('')
+  }
+
+  function updateSelection(playerIndex, ids, include) {
+    setSelections((current) => {
+      const next = [...current]
+      if (ids === null) {
+        next[playerIndex] = include ? null : []
+      } else {
+        const selected = new Set(
+          current[playerIndex] ?? perks.map((perk) => perk.id),
+        )
+        for (const id of ids) {
+          if (include) selected.add(id)
+          else selected.delete(id)
+        }
+        next[playerIndex] = [...selected]
+      }
+      return next
+    })
+    resetDraw()
+  }
 
   function changePlayerCount(count) {
     setPlayerCount(count)
-    setBuilds([])
-    setLocks({})
+    resetDraw()
   }
 
   function updatePlayerName(playerIndex, name) {
@@ -27,22 +85,61 @@ export function useLoadoutRandomizer(perks) {
 
   function togglePerkRepetition() {
     setAllowRepeat((currentValue) => !currentValue)
-    setBuilds([])
-    setLocks({})
+    resetDraw()
   }
 
   function randomizeAll() {
-    setBuilds((currentBuilds) =>
-      currentBuilds.length
-        ? rerollBuilds(perks, currentBuilds, locks, allowRepeat)
-        : createBuilds(perks, playerCount, allowRepeat),
-    )
+    draw()
   }
 
   function randomizePlayer(playerIndex) {
-    setBuilds((currentBuilds) =>
-      rerollBuilds(perks, currentBuilds, locks, allowRepeat, playerIndex),
-    )
+    draw(playerIndex)
+  }
+
+  function draw(playerIndex) {
+    setDrawError('')
+    const pools = selections.map((ids) => (ids ? new Set(ids) : null))
+    if (builds.length > 0) {
+      const next = rerollBuilds(
+        perks,
+        builds,
+        locks,
+        allowRepeat,
+        playerIndex,
+        pools,
+      )
+      if (next === builds) {
+        setDrawError(
+          'Faltam perks diferentes para trocar todas as posições livres. Trave as que quer manter ou amplie a seleção.',
+        )
+      } else {
+        setBuilds(next)
+      }
+      return
+    }
+
+    const short = Array.from({ length: playerCount }, (_, player) => player)
+      .filter(
+        (player) =>
+          perks.filter((perk) => !pools[player] || pools[player].has(perk.id))
+            .length < PERKS_PER_PLAYER,
+      )
+      .map((player) => playerNames[player].trim() || `Jogador ${player + 1}`)
+    if (short.length) {
+      setDrawError(
+        `Selecione pelo menos 4 perks para cada jogador. Seleção insuficiente: ${short.join(', ')}.`,
+      )
+      return
+    }
+
+    const next = createBuilds(perks, playerCount, allowRepeat, pools)
+    if (next.length === 0) {
+      setDrawError(
+        'As seleções do grupo se sobrepõem demais. Amplie as seleções ou permita repetir perks entre jogadores.',
+      )
+      return
+    }
+    setBuilds(next)
   }
 
   function togglePerkLock(playerIndex, slotIndex) {
@@ -59,13 +156,16 @@ export function useLoadoutRandomizer(perks) {
     allowRepeat,
     builds,
     changePlayerCount,
+    drawError,
     locks,
     playerCount,
     playerNames,
     randomizeAll,
     randomizePlayer,
+    selections,
     togglePerkRepetition,
     togglePerkLock,
     updatePlayerName,
+    updateSelection,
   }
 }

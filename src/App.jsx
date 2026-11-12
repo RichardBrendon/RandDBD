@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { EmptyState } from './components/EmptyState'
 import { Hero } from './components/Hero'
 import { MatchConfigurator } from './components/MatchConfigurator'
+import { PerkCatalog } from './components/PerkCatalog'
 import { PerkModal } from './components/PerkModal'
 import { Results } from './components/Results'
 import { SiteFooter } from './components/SiteFooter'
@@ -31,6 +32,20 @@ export function App() {
         playerCount={randomizer.playerCount}
         playerNames={randomizer.playerNames}
       />
+
+      <PerkCatalog
+        perks={survivorPerks}
+        playerCount={randomizer.playerCount}
+        playerNames={randomizer.playerNames}
+        selections={randomizer.selections}
+        onUpdateSelection={randomizer.updateSelection}
+        onPerkSelect={setSelectedPerk}
+      />
+      {randomizer.drawError && (
+        <p className="draw-error" role="alert">
+          {randomizer.drawError}
+        </p>
+      )}
 
       {randomizer.builds.length > 0 ? (
         <Results
