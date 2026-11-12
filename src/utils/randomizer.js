@@ -31,25 +31,43 @@ export function createBuilds(perks, playerCount, allowRepeat) {
   })
 }
 
-export function rerollBuild(perks, builds, playerIndex, allowRepeat) {
-  const currentBuild = builds[playerIndex]
-  if (!currentBuild) return builds
-
-  const blockedPerkIds = new Set(currentBuild.map((perk) => perk.id))
+export function rerollBuilds(perks, builds, locks, allowRepeat, playerIndex) {
+  const shouldKeep = (player, slot) =>
+    (playerIndex !== undefined && player !== playerIndex) ||
+    locks[player]?.[slot]
+  const reserved = new Set()
 
   if (!allowRepeat) {
-    builds.forEach((build, index) => {
-      if (index !== playerIndex) {
-        build.forEach((perk) => blockedPerkIds.add(perk.id))
-      }
+    builds.forEach((build, player) => {
+      build.forEach((perk, slot) => {
+        if (shouldKeep(player, slot)) reserved.add(perk.id)
+      })
     })
   }
 
-  const replacement = shuffle(
-    perks.filter((perk) => !blockedPerkIds.has(perk.id)),
-  ).slice(0, PERKS_PER_PLAYER)
+  const next = []
+  for (const [player, build] of builds.entries()) {
+    const openSlots = build.filter((_, slot) => !shouldKeep(player, slot))
+    if (openSlots.length === 0) {
+      next.push(build)
+      continue
+    }
 
-  return builds.map((build, index) =>
-    index === playerIndex ? replacement : build,
-  )
+    const previous = new Set(build.map((perk) => perk.id))
+    const available = shuffle(
+      perks.filter((perk) => !previous.has(perk.id) && !reserved.has(perk.id)),
+    )
+    if (available.length < openSlots.length) return builds
+
+    next.push(
+      build.map((perk, slot) => {
+        if (shouldKeep(player, slot)) return perk
+        const replacement = available.pop()
+        if (!allowRepeat) reserved.add(replacement.id)
+        return replacement
+      }),
+    )
+  }
+
+  return next
 }

@@ -35,9 +35,11 @@ export function App() {
       {randomizer.builds.length > 0 ? (
         <Results
           builds={randomizer.builds}
+          locks={randomizer.locks}
           onPerkSelect={setSelectedPerk}
           onRandomizeAll={randomizer.randomizeAll}
           onRandomizePlayer={randomizer.randomizePlayer}
+          onTogglePerkLock={randomizer.togglePerkLock}
           playerCount={randomizer.playerCount}
           playerNames={randomizer.playerNames}
         />

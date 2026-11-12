@@ -310,6 +310,8 @@ header {
 }
 .results-head {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: space-between;
   align-items: end;
   border-bottom: 1px solid #292d2c;
@@ -323,6 +325,34 @@ header {
   cursor: pointer;
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.results button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.copy-status,
+.manual-copy {
+  color: #c4cdca;
+  font-size: 12px;
+}
+.copy-status:empty {
+  margin: 0;
+}
+.manual-copy textarea {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #131616;
+  color: inherit;
+  border: 1px solid #393e3d;
 }
 .players {
   display: grid;
@@ -392,12 +422,32 @@ header {
   gap: 9px;
   padding-top: 22px;
 }
-.perks button {
+.perk-slot {
   min-width: 0;
+  text-align: center;
+}
+.perk-details {
+  width: 100%;
   background: transparent;
   border: 0;
   cursor: pointer;
   padding: 5px;
+}
+.perk-lock {
+  display: inline-grid;
+  place-items: center;
+  min-width: 36px;
+  min-height: 36px;
+  margin-top: 4px;
+  border: 1px solid #393e3d;
+  background: #131616;
+  color: #c4cdca;
+  cursor: pointer;
+}
+.perk-lock[aria-pressed='true'] {
+  color: #f3dcff;
+  border-color: #bfa9ee;
+  background: #32234a;
 }
 .perks b,
 .perks small {
@@ -605,12 +655,6 @@ footer {
   }
   footer {
     gap: 20px;
-  }
-  .results-head button {
-    font-size: 0;
-  }
-  .results-head button svg {
-    margin: 0;
   }
   .hint {
     text-align: center;
