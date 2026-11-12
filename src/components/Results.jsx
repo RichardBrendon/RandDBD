@@ -1,5 +1,6 @@
-import { Copy, RefreshCw, Star } from 'lucide-react'
+import { Copy, Link, RefreshCw, Star } from 'lucide-react'
 import { useState } from 'react'
+import { createBuildLink } from '../utils/shareBuild'
 import { PerkCard } from './PerkCard'
 
 function getPlayerName(playerNames, playerIndex) {
@@ -9,7 +10,7 @@ function getPlayerName(playerNames, playerIndex) {
 export function Results({
   builds,
   favorite,
-  locks,
+  locks = {},
   onPerkSelect,
   onRandomizeAll,
   onRandomizePlayer,
@@ -18,26 +19,28 @@ export function Results({
   playerCount,
   playerNames,
 }) {
-  const [copiedText, setCopiedText] = useState('')
-  const [manualCopyText, setManualCopyText] = useState('')
+  const [copyResult, setCopyResult] = useState(null)
   const shareText = builds
     .map(
       (build, player) =>
         `${getPlayerName(playerNames, player)}\n${build.map((perk) => `• ${perk.name}`).join('\n')}`,
     )
     .join('\n\n')
+  const shareLink = createBuildLink(builds, playerNames)
+  const activeCopyResult =
+    copyResult?.value === shareText || copyResult?.value === shareLink
+      ? copyResult
+      : null
   const allLocked = builds.every((build, player) =>
     build.every((_, slot) => locks[player]?.[slot]),
   )
 
-  async function copyBuilds() {
+  async function copy(value, message) {
     try {
-      await navigator.clipboard.writeText(shareText)
-      setCopiedText(shareText)
-      setManualCopyText('')
+      await navigator.clipboard.writeText(value)
+      setCopyResult({ value, message })
     } catch {
-      setCopiedText('')
-      setManualCopyText(shareText)
+      setCopyResult({ value, manual: true })
     }
   }
 
@@ -46,32 +49,45 @@ export function Results({
       <div className="results-head">
         <div>
           <span>RESULTADO</span>
-          <h2>{playerCount === 1 ? 'Seu loadout' : 'Loadouts do esquadrão'}</h2>
+          <h2>
+            {!onRandomizeAll
+              ? 'Build compartilhada'
+              : playerCount === 1
+                ? 'Seu loadout'
+                : 'Loadouts do esquadrão'}
+          </h2>
         </div>
 
         <div className="result-actions">
-          <button aria-pressed={favorite} onClick={onToggleFavorite}>
-            <Star size={16} fill={favorite ? 'currentColor' : 'none'} />{' '}
-            Favoritar
-          </button>
-          <button onClick={copyBuilds}>
+          {onToggleFavorite && (
+            <button aria-pressed={favorite} onClick={onToggleFavorite}>
+              <Star size={16} fill={favorite ? 'currentColor' : 'none'} />{' '}
+              Favoritar
+            </button>
+          )}
+          <button onClick={() => copy(shareText, 'Build copiada.')}>
             <Copy size={16} /> Copiar build
           </button>
-          <button disabled={allLocked} onClick={onRandomizeAll}>
-            <RefreshCw size={16} /> Rolar novamente
+          <button onClick={() => copy(shareLink, 'Link copiado.')}>
+            <Link size={16} /> Copiar link
           </button>
+          {onRandomizeAll && (
+            <button disabled={allLocked} onClick={onRandomizeAll}>
+              <RefreshCw size={16} /> Rolar novamente
+            </button>
+          )}
         </div>
       </div>
       <p className="copy-status" role="status">
-        {copiedText === shareText && 'Build copiada.'}
+        {activeCopyResult?.message}
       </p>
-      {manualCopyText === shareText && (
+      {activeCopyResult?.manual && (
         <label className="manual-copy">
-          Selecione o texto para copiar.
+          Selecione o conteúdo para copiar.
           <textarea
             onFocus={(event) => event.currentTarget.select()}
             readOnly
-            value={shareText}
+            value={activeCopyResult.value}
           />
         </label>
       )}
@@ -90,7 +106,7 @@ export function Results({
                   <small>SOBREVIVENTE</small>
                 </div>
 
-                {playerCount > 1 && (
+                {playerCount > 1 && onRandomizePlayer && (
                   <button
                     aria-label={`Rolar novamente as perks de ${playerName}`}
                     className="player-reroll"
@@ -111,7 +127,10 @@ export function Results({
                     key={slot}
                     locked={Boolean(locks[playerIndex]?.[slot])}
                     onSelect={onPerkSelect}
-                    onToggleLock={() => onTogglePerkLock(playerIndex, slot)}
+                    onToggleLock={
+                      onTogglePerkLock &&
+                      (() => onTogglePerkLock(playerIndex, slot))
+                    }
                     perk={perk}
                   />
                 ))}

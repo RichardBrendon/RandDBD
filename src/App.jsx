@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { EmptyState } from './components/EmptyState'
 import { Hero } from './components/Hero'
 import { MatchConfigurator } from './components/MatchConfigurator'
@@ -15,11 +15,15 @@ import {
   snapshotKey,
   useSavedLoadouts,
 } from './hooks/useSavedLoadouts'
+import { readBuildLink } from './utils/shareBuild'
 
 const perksById = new Map(survivorPerks.map((perk) => [perk.id, perk]))
 
 export function App() {
   const [selectedPerk, setSelectedPerk] = useState(null)
+  const [shared, setShared] = useState(() =>
+    readBuildLink(window.location.hash, perksById),
+  )
   const library = useSavedLoadouts()
   const randomizer = useLoadoutRandomizer(survivorPerks, library.recordDraw)
   const currentSnapshot = buildSnapshot(
@@ -28,6 +32,40 @@ export function App() {
   )
   const currentKey = snapshotKey(currentSnapshot)
   const favorite = library.favorites.some((entry) => entry.key === currentKey)
+
+  useEffect(() => {
+    function updateSharedBuild() {
+      setShared(readBuildLink(window.location.hash, perksById))
+      setSelectedPerk(null)
+    }
+    window.addEventListener('hashchange', updateSharedBuild)
+    return () => window.removeEventListener('hashchange', updateSharedBuild)
+  }, [])
+
+  if (shared) {
+    return (
+      <main>
+        <SiteHeader perkCount={perksById.size} />
+        <div className="shared-navigation">
+          <a href="#">Ir para o sorteio</a>
+        </div>
+        {shared.error ? (
+          <p className="draw-error" role="alert">
+            {shared.error}
+          </p>
+        ) : (
+          <Results
+            builds={shared.builds}
+            onPerkSelect={setSelectedPerk}
+            playerCount={shared.builds.length}
+            playerNames={shared.playerNames}
+          />
+        )}
+        <SiteFooter />
+        <PerkModal onClose={() => setSelectedPerk(null)} perk={selectedPerk} />
+      </main>
+    )
+  }
 
   return (
     <main>
