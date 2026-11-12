@@ -1,4 +1,4 @@
-import { Copy, RefreshCw } from 'lucide-react'
+import { Copy, RefreshCw, Star } from 'lucide-react'
 import { useState } from 'react'
 import { PerkCard } from './PerkCard'
 
@@ -8,11 +8,13 @@ function getPlayerName(playerNames, playerIndex) {
 
 export function Results({
   builds,
+  favorite,
   locks,
   onPerkSelect,
   onRandomizeAll,
   onRandomizePlayer,
   onTogglePerkLock,
+  onToggleFavorite,
   playerCount,
   playerNames,
 }) {
@@ -48,6 +50,10 @@ export function Results({
         </div>
 
         <div className="result-actions">
+          <button aria-pressed={favorite} onClick={onToggleFavorite}>
+            <Star size={16} fill={favorite ? 'currentColor' : 'none'} />{' '}
+            Favoritar
+          </button>
           <button onClick={copyBuilds}>
             <Copy size={16} /> Copiar build
           </button>

@@ -27,7 +27,7 @@ function readSelections() {
   return []
 }
 
-export function useLoadoutRandomizer(perks) {
+export function useLoadoutRandomizer(perks, onDraw) {
   const [playerCount, setPlayerCount] = useState(1)
   const [playerNames, setPlayerNames] = useState(INITIAL_PLAYER_NAMES)
   const [allowRepeat, setAllowRepeat] = useState(true)
@@ -88,6 +88,19 @@ export function useLoadoutRandomizer(perks) {
     resetDraw()
   }
 
+  function applyPreset(config) {
+    setPlayerCount(config.playerCount)
+    setPlayerNames(
+      Array.from(
+        { length: MAX_PLAYERS },
+        (_, index) => config.playerNames[index] ?? '',
+      ),
+    )
+    setAllowRepeat(config.allowRepeat)
+    setSelections(config.selections)
+    resetDraw()
+  }
+
   function randomizeAll() {
     draw()
   }
@@ -100,6 +113,13 @@ export function useLoadoutRandomizer(perks) {
     setDrawError('')
     const pools = selections.map((ids) => (ids ? new Set(ids) : null))
     if (builds.length > 0) {
+      const hasOpenSlot = builds.some(
+        (build, player) =>
+          (playerIndex === undefined || player === playerIndex) &&
+          build.some((_, slot) => !locks[player]?.[slot]),
+      )
+      if (!hasOpenSlot) return
+
       const next = rerollBuilds(
         perks,
         builds,
@@ -114,6 +134,7 @@ export function useLoadoutRandomizer(perks) {
         )
       } else {
         setBuilds(next)
+        onDraw(next, playerNames)
       }
       return
     }
@@ -140,6 +161,7 @@ export function useLoadoutRandomizer(perks) {
       return
     }
     setBuilds(next)
+    onDraw(next, playerNames)
   }
 
   function togglePerkLock(playerIndex, slotIndex) {
@@ -154,6 +176,7 @@ export function useLoadoutRandomizer(perks) {
 
   return {
     allowRepeat,
+    applyPreset,
     builds,
     changePlayerCount,
     drawError,
