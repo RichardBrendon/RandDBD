@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { EXHAUSTION_EFFECT, HEALING_EFFECT } from '../utils/challenges'
 
 const EFFECTS = [
-  ['Cura', /\bheal(?:s|ed|ing)?\b/i],
+  ['Cura', HEALING_EFFECT],
   ['Geradores', /\bgenerators?\b/i],
   ['Auras', /\bauras?\b/i],
-  ['Exaustão', /\bexhaust(?:ed|ion)\b/i],
+  ['Exaustão', EXHAUSTION_EFFECT],
   ['Totens', /\btotems?\b/i],
   ['Ganchos', /\b(?:hooks?|hooked|unhooks?|unhooked|unhooking)\b/i],
   ['Perseguição', /\bchas(?:e|es|ed|ing)\b/i],

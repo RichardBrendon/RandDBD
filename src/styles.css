@@ -308,6 +308,19 @@ header {
   margin: 60px auto;
   padding: 0 28px;
 }
+.challenge-mode {
+  border-top: 1px solid #292d2c;
+  margin: 12px 0 16px;
+  padding-top: 12px;
+}
+.challenge-mode summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.challenge-mode p {
+  color: #c4cdca;
+  font-size: 12px;
+}
 .control.perk-catalog,
 .control.saved-loadouts {
   margin: 16px auto 0;

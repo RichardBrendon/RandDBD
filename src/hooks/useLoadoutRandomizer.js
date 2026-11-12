@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { EMPTY_CHALLENGE, limitChallenge } from '../utils/challenges'
 import {
   createBuilds,
   PERKS_PER_PLAYER,
@@ -35,6 +36,12 @@ export function useLoadoutRandomizer(perks, onDraw) {
   const [locks, setLocks] = useState({})
   const [selections, setSelections] = useState(readSelections)
   const [drawError, setDrawError] = useState('')
+  const [challenge, setChallenge] = useState(EMPTY_CHALLENGE)
+
+  function changeChallenge(next) {
+    setChallenge(limitChallenge(next, playerCount))
+    setDrawError('')
+  }
 
   useEffect(() => {
     try {
@@ -72,6 +79,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
 
   function changePlayerCount(count) {
     setPlayerCount(count)
+    setChallenge((current) => limitChallenge(current, count))
     resetDraw()
   }
 
@@ -98,6 +106,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
     )
     setAllowRepeat(config.allowRepeat)
     setSelections(config.selections)
+    setChallenge(limitChallenge(config.challenge, config.playerCount))
     resetDraw()
   }
 
@@ -111,6 +120,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
 
   function draw(playerIndex) {
     setDrawError('')
+    const hasChallenge = challenge.healing || challenge.exhaustion
     const pools = selections.map((ids) => (ids ? new Set(ids) : null))
     if (builds.length > 0) {
       const hasOpenSlot = builds.some(
@@ -118,7 +128,11 @@ export function useLoadoutRandomizer(perks, onDraw) {
           (playerIndex === undefined || player === playerIndex) &&
           build.some((_, slot) => !locks[player]?.[slot]),
       )
-      if (!hasOpenSlot) return
+      if (!hasOpenSlot) {
+        if (hasChallenge)
+          setDrawError('Destrave pelo menos uma perk para sortear novamente.')
+        return
+      }
 
       const next = rerollBuilds(
         perks,
@@ -127,10 +141,13 @@ export function useLoadoutRandomizer(perks, onDraw) {
         allowRepeat,
         playerIndex,
         pools,
+        challenge,
       )
       if (next === builds) {
         setDrawError(
-          'Faltam perks diferentes para trocar todas as posições livres. Trave as que quer manter ou amplie a seleção.',
+          hasChallenge
+            ? 'Não há trocas que respeitem o desafio e as perks mantidas. Ajuste as travas, as seleções ou as regras do desafio.'
+            : 'Faltam perks diferentes para trocar todas as posições livres. Trave as que quer manter ou amplie a seleção.',
         )
       } else {
         setBuilds(next)
@@ -153,10 +170,12 @@ export function useLoadoutRandomizer(perks, onDraw) {
       return
     }
 
-    const next = createBuilds(perks, playerCount, allowRepeat, pools)
+    const next = createBuilds(perks, playerCount, allowRepeat, pools, challenge)
     if (next.length === 0) {
       setDrawError(
-        'As seleções do grupo se sobrepõem demais. Amplie as seleções ou permita repetir perks entre jogadores.',
+        hasChallenge
+          ? 'Não há uma combinação completa com estas regras e perks disponíveis. Ajuste o desafio, amplie as seleções ou permita repetições entre jogadores.'
+          : 'As seleções do grupo se sobrepõem demais. Amplie as seleções ou permita repetir perks entre jogadores.',
       )
       return
     }
@@ -178,6 +197,8 @@ export function useLoadoutRandomizer(perks, onDraw) {
     allowRepeat,
     applyPreset,
     builds,
+    challenge,
+    changeChallenge,
     changePlayerCount,
     drawError,
     locks,

@@ -4,6 +4,7 @@ const PLAYER_OPTIONS = [1, 2, 3, 4]
 
 export function MatchConfigurator({
   allowRepeat,
+  challengeControls,
   onPlayerCountChange,
   onPlayerNameChange,
   onRandomize,
@@ -76,6 +77,7 @@ export function MatchConfigurator({
         </button>
       </div>
 
+      {challengeControls}
       <button className="random" onClick={onRandomize}>
         <Shuffle size={20} /> RANDOMIZAR LOADOUTS
       </button>

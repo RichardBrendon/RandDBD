@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ChallengeMode } from './components/ChallengeMode'
 import { EmptyState } from './components/EmptyState'
 import { Hero } from './components/Hero'
 import { MatchConfigurator } from './components/MatchConfigurator'
@@ -80,6 +81,16 @@ export function App() {
         onToggleRepeat={randomizer.togglePerkRepetition}
         playerCount={randomizer.playerCount}
         playerNames={randomizer.playerNames}
+        challengeControls={
+          <ChallengeMode
+            challenge={randomizer.challenge}
+            onChange={randomizer.changeChallenge}
+            playerNames={randomizer.playerNames.slice(
+              0,
+              randomizer.playerCount,
+            )}
+          />
+        }
       />
 
       <PerkCatalog
@@ -119,6 +130,7 @@ export function App() {
           playerCount: randomizer.playerCount,
           playerNames: randomizer.playerNames.slice(0, randomizer.playerCount),
           allowRepeat: randomizer.allowRepeat,
+          challenge: randomizer.challenge,
           selections: randomizer.selections.slice(0, randomizer.playerCount),
         }}
         onApplyPreset={randomizer.applyPreset}
