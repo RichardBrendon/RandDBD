@@ -91,6 +91,16 @@ export function useLoadoutRandomizer(perks, onDraw) {
     )
   }
 
+  function loadPlayer(playerIndex, profile) {
+    updatePlayerName(playerIndex, profile.name)
+    setSelections((current) => {
+      const next = [...current]
+      next[playerIndex] = [...profile.perks]
+      return next
+    })
+    resetDraw()
+  }
+
   function togglePerkRepetition() {
     setAllowRepeat((currentValue) => !currentValue)
     resetDraw()
@@ -204,6 +214,7 @@ export function useLoadoutRandomizer(perks, onDraw) {
     changePlayerCount,
     drawError,
     locks,
+    loadPlayer,
     playerCount,
     playerNames,
     randomizeAll,

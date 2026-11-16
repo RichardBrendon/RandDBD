@@ -12,6 +12,8 @@ export function MatchConfigurator({
   onToggleRepeat,
   playerCount,
   playerNames,
+  profiles,
+  onLoadProfile,
 }) {
   return (
     <section className="control">
@@ -45,18 +47,39 @@ export function MatchConfigurator({
 
         <div className="name-grid">
           {Array.from({ length: playerCount }, (_, playerIndex) => (
-            <label key={playerIndex}>
-              <span>JOGADOR {playerIndex + 1}</span>
-              <input
-                autoComplete="off"
-                maxLength={24}
-                onChange={(event) =>
-                  onPlayerNameChange(playerIndex, event.target.value)
-                }
-                placeholder={`Nome do jogador ${playerIndex + 1}`}
-                value={playerNames[playerIndex]}
-              />
-            </label>
+            <div className="player-fields" key={playerIndex}>
+              <label>
+                <span>JOGADOR {playerIndex + 1}</span>
+                <input
+                  autoComplete="off"
+                  maxLength={24}
+                  onChange={(event) =>
+                    onPlayerNameChange(playerIndex, event.target.value)
+                  }
+                  placeholder={`Nome do jogador ${playerIndex + 1}`}
+                  value={playerNames[playerIndex]}
+                />
+              </label>
+              {profiles.length > 0 && (
+                <select
+                  aria-label={`Escolher jogador salvo para a posição ${playerIndex + 1}`}
+                  value=""
+                  onChange={(event) => {
+                    const profile = profiles.find(
+                      ({ id }) => id === event.target.value,
+                    )
+                    if (profile) onLoadProfile(playerIndex, profile)
+                  }}
+                >
+                  <option value="">Escolher jogador salvo</option>
+                  {profiles.map(({ id, name }) => (
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
           ))}
         </div>
       </div>

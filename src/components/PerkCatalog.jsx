@@ -26,6 +26,7 @@ export function PerkCatalog({
   selections,
   onUpdateSelection,
   onPerkSelect,
+  renderProfileActions,
 }) {
   const [query, setQuery] = useState('')
   const [owner, setOwner] = useState('')
@@ -103,6 +104,7 @@ export function PerkCatalog({
         {selectedCount} de {perks.length} disponíveis para este jogador ·{' '}
         {visible.length} resultados
       </p>
+      {renderProfileActions?.(player)}
       <div className="catalog-actions">
         <button onClick={() => onUpdateSelection(player, null, true)}>
           Usar todas

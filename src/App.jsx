@@ -7,12 +7,14 @@ import { MatchConfigurator } from './components/MatchConfigurator'
 import { PanelNavigation } from './components/PanelNavigation'
 import { PerkCatalog } from './components/PerkCatalog'
 import { PerkModal } from './components/PerkModal'
+import { PlayerProfiles } from './components/PlayerProfiles'
 import { Results } from './components/Results'
 import { SavedLoadouts } from './components/SavedLoadouts'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
 import survivorPerks from './data/survivor-perks.json'
 import { useLoadoutRandomizer } from './hooks/useLoadoutRandomizer'
+import { usePlayerProfiles } from './hooks/usePlayerProfiles'
 import {
   buildSnapshot,
   snapshotKey,
@@ -32,6 +34,9 @@ export function App() {
     readBuildLink(window.location.hash, perksById),
   )
   const library = useSavedLoadouts()
+  const profileLibrary = usePlayerProfiles()
+  const [linkedProfiles, setLinkedProfiles] = useState({})
+  const [profileMessage, setProfileMessage] = useState('')
   const randomizer = useLoadoutRandomizer(survivorPerks, library.recordDraw)
   const currentSnapshot = buildSnapshot(
     randomizer.builds,
@@ -122,7 +127,20 @@ export function App() {
         <MatchConfigurator
           allowRepeat={randomizer.allowRepeat}
           onPlayerCountChange={randomizer.changePlayerCount}
-          onPlayerNameChange={randomizer.updatePlayerName}
+          onPlayerNameChange={(player, name) => {
+            randomizer.updatePlayerName(player, name)
+            setLinkedProfiles((current) => ({ ...current, [player]: null }))
+            setProfileMessage('')
+          }}
+          profiles={profileLibrary.profiles}
+          onLoadProfile={(player, profile) => {
+            randomizer.loadPlayer(player, profile)
+            setLinkedProfiles((current) => ({
+              ...current,
+              [player]: profile.id,
+            }))
+            setProfileMessage('')
+          }}
           onRandomize={drawFromConfiguration}
           onEditAvailablePerks={() => changePanel('catalog', true)}
           onToggleRepeat={randomizer.togglePerkRepetition}
@@ -184,6 +202,56 @@ export function App() {
           playerCount={randomizer.playerCount}
           playerNames={randomizer.playerNames}
           selections={randomizer.selections}
+          renderProfileActions={(player) => {
+            const name = randomizer.playerNames[player].trim()
+            const linked = profileLibrary.profiles.find(
+              ({ id }) => id === linkedProfiles[player],
+            )
+            const save = (id) => {
+              const selection = randomizer.selections[player] ?? [
+                ...perksById.keys(),
+              ]
+              const profileId = profileLibrary.save(name, selection, id)
+              setLinkedProfiles((current) => ({
+                ...current,
+                [player]: profileId,
+              }))
+              setProfileMessage({
+                player,
+                text: `Perfil de ${name} ${id ? 'atualizado' : 'salvo'}.`,
+              })
+            }
+            return (
+              <div className="profile-actions">
+                <div className="catalog-actions">
+                  <button
+                    disabled={!name || Boolean(linked)}
+                    onClick={() => save()}
+                  >
+                    Salvar jogador
+                  </button>
+                  {linked && (
+                    <button disabled={!name} onClick={() => save(linked.id)}>
+                      Atualizar jogador salvo
+                    </button>
+                  )}
+                </div>
+                {!name && (
+                  <p className="catalog-count">
+                    Preencha o nome do jogador no Sorteio para salvar o perfil.
+                  </p>
+                )}
+                {profileLibrary.storageError && (
+                  <p role="alert">
+                    O perfil ficará disponível apenas nesta sessão.
+                  </p>
+                )}
+                <p className="catalog-count" role="status">
+                  {profileMessage?.player === player ? profileMessage.text : ''}
+                </p>
+              </div>
+            )
+          }}
           onUpdateSelection={randomizer.updateSelection}
           onPerkSelect={setSelectedPerk}
         />
@@ -196,6 +264,15 @@ export function App() {
         tabIndex={0}
         hidden={activePanel !== 'saved'}
       >
+        <PlayerProfiles
+          profileLibrary={profileLibrary}
+          perks={survivorPerks}
+          onPerkSelect={setSelectedPerk}
+          onDelete={(id) => {
+            profileLibrary.remove(id)
+            setProfileMessage('')
+          }}
+        />
         <SavedLoadouts
           library={library}
           config={{
@@ -210,6 +287,8 @@ export function App() {
           }}
           onApplyPreset={(config) => {
             randomizer.applyPreset(config)
+            setLinkedProfiles({})
+            setProfileMessage('')
             changePanel('draw', true)
           }}
           onOpenPerk={setSelectedPerk}
